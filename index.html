@@ -13,8 +13,10 @@ main {
     max-width: 800px;
 }
 #punch {
+    -webkit-appearance: none;
     width: 100%;
-    padding: 10px;
+    padding: 20px;
+    border-radius: 5px;
 }
 #total {
     margin-top: 20px;
@@ -25,26 +27,28 @@ main {
     border-collapse: collapse;
 }
 #punches thead tr {
-        border-bottom: 2px solid black;
+    border-bottom: 2px solid black;
 }
 #punches thead tr th {
-            text-align: left;
-            padding-left: 5px;
-            padding-right: 5px;
-        }
+    text-align: left;
+    padding-left: 5px;
+    padding-right: 5px;
+}
 #punches tbody tr {
     border-top: 1px solid black;
-    }
+}
 #punches tbody tr td {
-            padding-left: 5px;
-            padding-right: 5px;
+    padding-left: 5px;
+    padding-right: 5px;
     white-space: nowrap;
-        }
+}
 #punches tbody tr:nth-child(2n-1) {
-        background-color: buttonface;
+    background-color: buttonface;
 }
 #clear {
+    -webkit-appearance: none;
     margin-top: 50px;
+    border-radius: 5px;
 }
 @media print {
     button {
