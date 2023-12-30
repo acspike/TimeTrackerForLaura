@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Time Tracker For Laura</title>
+    <style>
+h1 {
+    font-size: 20px;
+}
+main {
+    margin: auto;
+    max-width: 800px;
+}
+#punch {
+    width: 100%;
+    padding: 10px;
+}
+#total {
+    margin-top: 20px;
+}
+#punches {
+    width: 100%;
+    margin-top: 20px;
+    border-collapse: collapse;
+    thead tr {
+        border-bottom: 2px solid black;
+        th {
+            text-align: left;
+            padding-left: 5px;
+            padding-right: 5px;
+        }
+    }
+    tbody tr {
+        border-top: 1px solid black;
+        td {
+            padding-left: 5px;
+            padding-right: 5px;
+        }
+    }
+    tbody tr:nth-child(2n-1) {
+        background-color: buttonface;
+    }
+}
+#clear {
+    margin-top: 50px;
+}
+    </style>
+</head>
+<body>
+    <main>
+        <h1>Time Tracker For Laura</h1>
+        <button type="button" id="punch">Punch <span></span></button>
+        <div id="total">Total: <span></span></div>
+        <table id="punches">
+            <thead>
+                <tr>
+                    <th>Day</th>
+                    <th>In</th>
+                    <th>Out</th>
+                    <th>Duration</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+        <button type="button" id="clear">Clear</button>
+    </main>
+    <template id="punch-row-template">
+        <tr>
+            <td class="punch-day"></td>
+            <td class="punch-in"></td>
+            <td class="punch-out"></td>
+            <td class="punch-duration"></td>
+        </tr>
+    </template>
+    <script>
+let storage;
+
+const loadStorage = function(){
+    if (localStorage.getItem('TimeTrackerForLaura') === null) {
+        storage = {punches: []};
+    } else {
+        storage = JSON.parse(localStorage.getItem('TimeTrackerForLaura'));
+    }
+};
+
+const saveStorage = function(){
+    localStorage.setItem('TimeTrackerForLaura', JSON.stringify(storage));
+};
+
+
+
+function divmod(dividend, divisor){
+    const quotient = Math.floor(dividend / divisor);
+    const remainder = dividend % divisor;
+    return [quotient, remainder];
+}
+
+const formatDuration = function(ms){
+    const millisecondsPerSecond = 1000;
+    const millisecondsPerMinute = millisecondsPerSecond * 60;
+    const millisecondsPerHour = millisecondsPerMinute * 60;
+
+    let hours, minutes, remainder;
+
+    [hours, remainder] = divmod(ms, millisecondsPerHour);
+    [minutes, remainder] = divmod(remainder, millisecondsPerMinute);
+
+    const hourUnit = hours == 1 ? 'hour' : 'hours';
+    const minuteUnit = minutes == 1 ? 'minute' : 'minutes';
+
+    return `${hours} ${hourUnit} ${minutes} ${minuteUnit}`;
+}
+
+const updateDisplay = function(){
+    const punchCount = storage.punches.length;
+    if (punchCount % 2 === 0) {
+        document.querySelector('#punch span').textContent = 'In';
+    } else {
+        document.querySelector('#punch span').textContent = 'Out';
+    }
+
+    let total = 0;
+
+    let i = 0;    
+    const template = document.getElementById('punch-row-template');
+    const tbody = document.querySelector('table#punches tbody');
+    while(tbody.firstChild){
+      tbody.removeChild(tbody.firstChild);
+    }
+    while (i < punchCount){
+        const clone = template.content.cloneNode(true);
+        const punchIn = new Date(storage.punches[i]);
+        clone.querySelector('tr td.punch-day').textContent = punchIn.toDateString();
+        clone.querySelector('tr td.punch-in').textContent = punchIn.toLocaleTimeString('en-US');
+
+        if (punchCount > i + 1){
+            const punchOut = new Date(storage.punches[i + 1]);
+            const punchDuration = punchOut - punchIn;
+            total += punchDuration;
+
+            clone.querySelector('tr td.punch-out').textContent = punchOut.toLocaleTimeString('en-US');
+            clone.querySelector('tr td.punch-duration').textContent = formatDuration(punchDuration);
+        }
+
+        tbody.appendChild(clone);
+
+        i += 2;
+    }
+
+    document.querySelector('#total span').textContent = formatDuration(total);
+};
+
+document.getElementById('punch').addEventListener('click', function(){
+    storage.punches.push(new Date());
+    saveStorage();
+    updateDisplay();
+});
+
+document.getElementById('clear').addEventListener('click', function(){
+    if (window.confirm('Clear all punches?')){
+        storage.punches = [];
+        saveStorage();
+        updateDisplay();
+    }
+});
+
+window.addEventListener('load', function(){
+    loadStorage();
+    updateDisplay();
+});
+    </script>
+</body>
+</html>
